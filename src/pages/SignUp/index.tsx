@@ -15,6 +15,7 @@ import {Form} from '@unform/mobile';
 import * as Yup from 'yup';
 
 import getValidationErrors from '../../utils/getValidationErros';
+import api from '../../services/api';
 
 import Button from '../../components/Button';
 import Input from '../../components/Input';
@@ -45,12 +46,21 @@ const SignUp: React.FC = () => {
         email: Yup.string()
           .required('E-mail obrigatório')
           .email('E-mail inválido'),
-        password: Yup.string().required().min(6, 'Senha deve ter no mínimo 6 digitos'),
+        password: Yup.string()
+          .required()
+          .min(6, 'Senha deve ter no mínimo 6 digitos'),
       });
 
       await schema.validate(data, {abortEarly: false});
 
-      navigation.navigate('SignIn');
+      await api.post('/users', data);
+
+      navigation.goBack();
+
+      Alert.alert(
+        'Cadastro realizado com sucesso',
+        'Você já pode fazer login na aplicação.',
+      );
     } catch (e) {
       const isValidationError = e instanceof Yup.ValidationError;
 
