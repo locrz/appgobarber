@@ -13,6 +13,7 @@ import {FormHandles} from '@unform/core';
 import {Form} from '@unform/mobile';
 import * as Yup from 'yup';
 
+import {useAuth} from '../../hooks/auth';
 import getValidationErrors from '../../utils/getValidationErros';
 
 import Icon from 'react-native-vector-icons/Feather';
@@ -42,6 +43,10 @@ const SignIn: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
   const passwordInputRef = useRef<TextInput>(null);
 
+  const {signIn, user} = useAuth();
+
+  console.log(user);
+
   const handleFormSubmit = useCallback(async (data: SignInFormData) => {
     try {
       const schema = Yup.object().shape({
@@ -51,7 +56,9 @@ const SignIn: React.FC = () => {
 
       await schema.validate(data, {abortEarly: false});
 
+      await signIn(data);
     } catch (e) {
+      console.log(e);
       const isValidationError = e instanceof Yup.ValidationError;
 
       if (isValidationError) {
@@ -62,7 +69,7 @@ const SignIn: React.FC = () => {
 
       Alert.alert(
         'Aconteceu um erro',
-        'Não foi possível cadastrar novo usuário',
+        'Não foi possível autenticar',
       );
     }
   }, []);
