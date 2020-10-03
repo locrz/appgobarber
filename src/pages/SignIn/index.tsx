@@ -6,10 +6,14 @@ import {
   View,
   ScrollView,
   TextInput,
+  Alert,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {FormHandles} from '@unform/core';
 import {Form} from '@unform/mobile';
+import * as Yup from 'yup';
+
+import getValidationErrors from '../../utils/getValidationErros';
 
 import Icon from 'react-native-vector-icons/Feather';
 
@@ -27,14 +31,40 @@ import {
   CreateAccountButtonText,
 } from './styles';
 
+interface SignInFormData {
+  email: string;
+  password: string;
+}
+
 const SignIn: React.FC = () => {
   const navigation = useNavigation();
 
   const formRef = useRef<FormHandles>(null);
   const passwordInputRef = useRef<TextInput>(null);
 
-  const handleFormSubmit = useCallback((data) => {
-    console.log(data);
+  const handleFormSubmit = useCallback(async (data: SignInFormData) => {
+    try {
+      const schema = Yup.object().shape({
+        email: Yup.string().required('E-mail obrigatório'),
+        password: Yup.string().required('Senha obrigatória'),
+      });
+
+      await schema.validate(data, {abortEarly: false});
+
+    } catch (e) {
+      const isValidationError = e instanceof Yup.ValidationError;
+
+      if (isValidationError) {
+        const validationErrors = getValidationErrors(e);
+        formRef.current?.setErrors(validationErrors);
+        return;
+      }
+
+      Alert.alert(
+        'Aconteceu um erro',
+        'Não foi possível cadastrar novo usuário',
+      );
+    }
   }, []);
 
   return (
