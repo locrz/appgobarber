@@ -55,12 +55,12 @@ const SignUp: React.FC = () => {
 
       await api.post('/users', data);
 
-      navigation.goBack();
-
       Alert.alert(
         'Cadastro realizado com sucesso',
         'Você já pode fazer login na aplicação.',
       );
+
+      navigation.goBack();
     } catch (e) {
       const isValidationError = e instanceof Yup.ValidationError;
 
@@ -70,9 +70,15 @@ const SignUp: React.FC = () => {
         return;
       }
 
-      Alert.alert('Aconteceu um erro', 'Não foi possível autenticar');
+      console.log(e);
+
+      Alert.alert('Aconteceu um erro', 'Não foi possível realizar o cadastro');
     }
   }, []);
+
+  const submitForm = useCallback(() => {
+    formRef.current?.submitForm();
+  }, [formRef]);
 
   return (
     <>
@@ -115,12 +121,10 @@ const SignUp: React.FC = () => {
                 icon="lock"
                 placeholder="Senha"
                 returnKeyType="send"
-                textContentType="password"
-                onSubmitEditing={() => formRef.current?.submitForm()}
+                textContentType="newPassword"
+                onSubmitEditing={submitForm}
               />
-              <Button onPress={() => formRef.current?.submitForm()}>
-                Cadastrar
-              </Button>
+              <Button onPress={submitForm}>Cadastrar</Button>
             </Form>
           </Container>
         </ScrollView>

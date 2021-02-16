@@ -45,8 +45,6 @@ const SignIn: React.FC = () => {
 
   const {signIn, user} = useAuth();
 
-  console.log(user);
-
   const handleFormSubmit = useCallback(async (data: SignInFormData) => {
     try {
       const schema = Yup.object().shape({
@@ -67,10 +65,7 @@ const SignIn: React.FC = () => {
         return;
       }
 
-      Alert.alert(
-        'Aconteceu um erro',
-        'Não foi possível autenticar',
-      );
+      Alert.alert('Aconteceu um erro', 'Não foi possível autenticar');
     }
   }, []);
 

@@ -14,14 +14,23 @@ interface SignInCredentials {
   password: string;
 }
 
+interface IUser {
+  id: string;
+  name: string;
+  email: string;
+  avatar_url: string;
+}
+
 interface AuthContextData {
-  user: object;
+  user: IUser;
+  isSigned: boolean;
+  loading: boolean;
   signIn(credentials: SignInCredentials): Promise<void>;
   signUp(): Promise<void>;
 }
 
 interface AuthState {
-  user: object;
+  user: IUser;
   token: string;
 }
 
@@ -29,6 +38,7 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 const AuthProvider: React.FC = ({children}) => {
   const [data, setData] = useState<AuthState>({} as AuthState);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadStoragedData() {
@@ -41,10 +51,12 @@ const AuthProvider: React.FC = ({children}) => {
       const user = storagedUser[1];
 
       if (token && user) {
+        api.defaults.headers.authorization = `Bearer ${token}`;
+
         setData({token, user: JSON.parse(user)});
-        return;
       }
-      setData({} as AuthState);
+
+      setLoading(false);
     }
 
     loadStoragedData();
@@ -60,6 +72,8 @@ const AuthProvider: React.FC = ({children}) => {
       ['@GoBarber:token', token],
     ]);
 
+    api.defaults.headers.authorization = `Bearer ${token}`;
+
     setData({token, user});
   }, []);
 
@@ -70,7 +84,8 @@ const AuthProvider: React.FC = ({children}) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{user: data.user, signIn, signUp}}>
+    <AuthContext.Provider
+      value={{user: data.user, isSigned: !!data.user, loading, signIn, signUp}}>
       {children}
     </AuthContext.Provider>
   );
